@@ -1,66 +1,62 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
+const path = require('path');
 const Engineer = require('./lib/Engineer');
 const Intern = require('./lib/Intern');
-const templatePage = require('./Src/template');
+const templatePagejs = require('./Src/template');
+const Manager = require('./lib/Manager');
+const employees = [];
 
-const builTeam = (dataObject) => {
-    return inquirer
-    .prompt([
+const createManager = () =>{
+    return inquirer.prompt([
         {
-            type: 'list',
-            name: 'Buildteam',
-            message: 'Which Employee would you like to add',
-            choices: ['Manager', 'Engineer', 'Intern', 'Finish Building Team']
+            type : 'input',
+            name : 'managername',
+            message : 'please enter managers name',
         },
-    
+        {
+            type: 'input',
+            name: 'managerid',
+            message: 'enter manager id number',
+        },
 
-    
-    ])
-    .then((menudata)=>{
-        if(menudata.BuildTeam === 'Engineer'){
-            return addEngineer(dataObject);
+        {
+            type: 'input',
+            name: 'manageremail',
+            message: 'enter manager email',
 
-        }else if(menudata.BuildTeam === 'Intern'){
-            return addIntern(dataObject);
-        }else if(menudata.BuildTeam === 'Manager'){
+        },
 
-        
-        
-            return addManager  (dataObject);
-        }else{
-            return dataObject;
+        {
+            type: 'input',
+            name: 'managerofficenumber',
+            message: 'enter manager office number',
+
         }
-        
-    });
-};
-
-const addEngineer = (objectData)=>{
-    return inquirer
-    .prompt([
-{
-    type: 'input',
-    name: 'EngineerName',
-    message:'Please enter the name of your Engineer'
-},
-{
-    type: 'input',
-    name:'EngineerId',
-    message: 'Please '
-}
     ])
-    .then((engineerData)=>{
-        const { engineerName, engineerId, engineerEmail, engineerGithub } =
-        engineerData;
 
-      const engineerClass = new Engineer(
-        engineerName,
-        engineerId,
-        engineerEmail,
-        engineerGithub
-      );
-      return builTeam(objectData)  
+    .then (managerData => {
+        const manager = new Manager(managerData.managername, managerData.managerid, managerData.manageremail, managerData.managerofficenumber)
+        employees.push(manager)
+        console.log(employees);
+    
     })
 }
 
-builTeam();
+
+const writeFile = data => {
+    console.log(data);
+    fs.writeFile('./Templates/index.html', data, err => {
+        if(err)
+        {
+            console.log(err);
+            return;
+        }
+
+        console.log('page is being created')
+    })
+}
+
+createManager()
+.then(employees => templatePagejs(employees))
+.then(pageHTML => writeFile(pageHTML))
